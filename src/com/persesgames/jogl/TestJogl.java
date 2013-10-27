@@ -22,14 +22,11 @@ public class TestJogl {
     public TestJogl() {
         GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2ES2));
 
-        // We may at this point tweak the caps and request a translucent drawable
-        // caps.setBackgroundOpaque(true);
         caps.setDoubleBuffered(true);
         GLWindow glWindow = GLWindow.create(caps);
 
         glWindow.setTitle("jogl-triangle");
 
-        //glWindow.setSize(glWindow.getWidth(), glWindow.getHeight());
         glWindow.setSize(800, 600);
 
         glWindow.setFullscreen(false);

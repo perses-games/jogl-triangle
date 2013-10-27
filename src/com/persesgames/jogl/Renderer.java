@@ -1,11 +1,12 @@
 package com.persesgames.jogl;
 
-import com.jogamp.graph.curve.opengl.TextRenderer;
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.newt.opengl.GLWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.media.opengl.*;
+import java.nio.FloatBuffer;
 
 /**
  * Date: 10/25/13
@@ -17,9 +18,24 @@ public class Renderer implements GLEventListener  {
     private volatile boolean stopped    = false;
     private volatile boolean dirty      = false;
 
-    private TextRenderer textRenderer;
+    private ShaderProgram shaderProgram;
 
     private final GLWindow glWindow;
+
+    private float[]                 vertices = {
+            -0.5f, -0.5f, 0.0f,
+             0.5f, -0.5f, 0.0f,
+             0.0f,  0.5f, 0.0f,
+
+            -1.0f, -1.0f, 0.0f,
+            1.0f,  1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,
+    };
+
+    private FloatBuffer             fbVertices          = Buffers.newDirectFloatBuffer(vertices);
+
+    int[]                           vboHandles;
+    private int                     vboVertices;
 
     public Renderer(GLWindow glWindow) {
         this.glWindow = glWindow;
@@ -34,10 +50,13 @@ public class Renderer implements GLEventListener  {
     }
 
     public void run() {
+        Renderer.this.glWindow.display();
+
         while(!stopped) {
             if (dirty) {
                 logger.info("rendering+" + System.currentTimeMillis());
                 Renderer.this.glWindow.display();
+                Renderer.this.glWindow.swapBuffers();
                 dirty = false;
             } else {
                 try {
@@ -64,6 +83,13 @@ public class Renderer implements GLEventListener  {
         int [] result = new int[1];
         gl.glGetIntegerv(GL2.GL_MAX_VERTEX_ATTRIBS, result, 0);
         logger.info("GL_MAX_VERTEX_ATTRIBS=" + result[0]);
+
+        shaderProgram = new ShaderProgram(gl, Util.loadAsText(getClass(), "simpleShader.vert"), Util.loadAsText(getClass(), "simpleShader.frag"));
+
+        vboHandles = new int[1];
+        gl.glGenBuffers(1, vboHandles, 0);
+
+        vboVertices = vboHandles[0];
     }
 
     @Override
@@ -77,7 +103,31 @@ public class Renderer implements GLEventListener  {
 
         GL2ES2 gl = drawable.getGL().getGL2ES2();
 
-        drawable.swapBuffers();
+        // Clear screen
+        gl.glClearColor(0.5f, 0, 0.5f, 1f);
+        gl.glClear(GL2ES2.GL_COLOR_BUFFER_BIT);
+
+        shaderProgram.begin();
+
+        // Select the VBO, GPU memory data, to use for vertices
+        gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER, vboVertices);
+
+        // transfer data to VBO, this perform the copy of data from CPU -> GPU memory
+        int numBytes = vertices.length * 4;
+        gl.glBufferData(GL.GL_ARRAY_BUFFER, numBytes, fbVertices, GL.GL_STATIC_DRAW);
+
+        // Associate Vertex attribute 0 with the last bound VBO
+        gl.glVertexAttribPointer(0 /* the vertex attribute */, 3,
+                GL2ES2.GL_FLOAT, false /* normalized? */, 0 /* stride */,
+                0 /* The bound VBO data offset */);
+
+        gl.glEnableVertexAttribArray(0);
+
+        gl.glDrawArrays(GL2ES2.GL_TRIANGLES, 0, 3); //Draw the vertices as triangle
+
+        gl.glDisableVertexAttribArray(0); // Allow release of vertex position memory
+
+        shaderProgram.end();
     }
 
     @Override

@@ -33,10 +33,9 @@ public class ShaderProgram {
     private int                 shaderProgram;
     private int                 vertShader;
     private int                 fragShader;
-    private int                 mpvLocation;
-    private int                 texture;
 
-    private Map<String, Long>   uniformLocations = new HashMap<>();
+    private Map<String, Integer> uniformLocations = new HashMap<>();
+    private Map<String, Integer> attribLocations = new HashMap<>();
 
     public ShaderProgram(GL2ES2 gl, String vertex, String fragment) {
         this.gl = gl;
@@ -57,19 +56,38 @@ public class ShaderProgram {
         gl.glAttachShader(shaderProgram, fragShader);
 
         gl.glLinkProgram(shaderProgram);
+    }
 
-        mpvLocation = gl.glGetUniformLocation(shaderProgram, "uniform_Projection");
-        texture = gl.glGetUniformLocation(shaderProgram, "u_texture");
+    public int getUniformLocation(String uniform) {
+        Integer result = uniformLocations.get(uniform);
+
+        if (result == null) {
+            result = gl.glGetUniformLocation(shaderProgram, uniform);
+
+            uniformLocations.put(uniform, result);
+        }
+
+        return result;
+    }
+
+    public int getAttribLocation(String attrib) {
+        Integer result = attribLocations.get(attrib);
+
+        if (result == null) {
+            result = gl.glGetAttribLocation(shaderProgram, attrib);
+
+            attribLocations.put(attrib, result);
+        }
+
+        return result;
     }
 
     public void bindAttributeLocation(int location, String name) {
         gl.glBindAttribLocation(shaderProgram, location, name);
     }
 
-    public void begin(float [] modelViewProjection) {
+    public void begin() {
         gl.glUseProgram(shaderProgram);
-        gl.glUniformMatrix4fv(mpvLocation, 1, false, modelViewProjection, 0);
-        //gl.glUniform1i(texture, textnr);
     }
 
     public void end() {
@@ -101,7 +119,7 @@ public class ShaderProgram {
             gl.glGetShaderiv(shader, GL2ES2.GL_INFO_LOG_LENGTH, logLength, 0);
 
             byte[] log = new byte[logLength[0]];
-            gl.glGetShaderInfoLog(vertShader, logLength[0], (int[]) null, 0, log, 0);
+            gl.glGetShaderInfoLog(shader, logLength[0], (int[]) null, 0, log, 0);
 
             throw new IllegalStateException("Error compiling the shader: " + new String(log));
         }
