@@ -23,18 +23,22 @@ public class TestJogl {
         GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2ES2));
 
         caps.setDoubleBuffered(true);
+
         GLWindow glWindow = GLWindow.create(caps);
 
         glWindow.setTitle("jogl-triangle");
 
         glWindow.setSize(800, 600);
 
-        glWindow.setFullscreen(false);
+        glWindow.setFullscreen(true);
         glWindow.setUndecorated(false);
         glWindow.setPointerVisible(true);
         glWindow.setVisible(true);
 
-        renderer = new Renderer(glWindow);
+        Keyboard keyboard = new Keyboard();
+        glWindow.addKeyListener(keyboard);
+
+        renderer = new Renderer(glWindow, keyboard);
 
         glWindow.addGLEventListener(renderer);
     }

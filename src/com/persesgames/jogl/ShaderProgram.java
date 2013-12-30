@@ -41,7 +41,7 @@ public class ShaderProgram {
         this.gl = gl;
 
         if (gl.isGL3core()) {
-            logger.info("GL3 core detected: explicit add #version 130 to shaders");
+            logger.info("GL3 core detected: explicit adding #version 130 to shaders");
 
             vertex = "#version 130\n" + vertex;
             fragment = "#version 130\n" + fragment;

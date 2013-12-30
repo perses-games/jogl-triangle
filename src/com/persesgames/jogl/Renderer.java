@@ -1,6 +1,7 @@
 package com.persesgames.jogl;
 
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.opengl.GLWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +24,9 @@ public class Renderer implements GLEventListener  {
     private final GLWindow glWindow;
 
     private float[]                 vertices = {
-            -0.5f, -0.5f, 0.0f,
+            -0.5f, -0.5f, -0.5f,
              0.5f, -0.5f, 0.0f,
-             0.0f,  0.5f, 0.0f,
-
-            -1.0f, -1.0f, 0.0f,
-            1.0f,  1.0f, 0.0f,
-            -1.0f,  1.0f, 0.0f,
+             0.0f,  0.5f, 0.5f,
     };
 
     private FloatBuffer             fbVertices          = Buffers.newDirectFloatBuffer(vertices);
@@ -37,8 +34,11 @@ public class Renderer implements GLEventListener  {
     int[]                           vboHandles;
     private int                     vboVertices;
 
-    public Renderer(GLWindow glWindow) {
+    private Keyboard                keyboard;
+
+    public Renderer(GLWindow glWindow, Keyboard keyboard) {
         this.glWindow = glWindow;
+        this.keyboard = keyboard;
     }
 
     public void stop() {
@@ -65,6 +65,8 @@ public class Renderer implements GLEventListener  {
                     logger.warn(e.getMessage(), e);
                 }
             }
+
+            stopped = keyboard.isPressed(KeyEvent.VK_ESCAPE);
         }
 
         Renderer.this.glWindow.destroy();
