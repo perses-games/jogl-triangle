@@ -28,9 +28,9 @@ public class TestJogl {
 
         glWindow.setTitle("jogl-triangle");
 
-        glWindow.setSize(800, 600);
+        glWindow.setSize(800, 800);
 
-        glWindow.setFullscreen(true);
+        glWindow.setFullscreen(false);
         glWindow.setUndecorated(false);
         glWindow.setPointerVisible(true);
         glWindow.setVisible(true);
